@@ -1,7 +1,4 @@
-# from constants import BULLET_SPEED, PLAYER_WIDTH, BULLET_RAD
-BULLET_SPEED = 5
-PLAYER_WIDTH = 0.7
-BULLET_RAD = 0.2
+from constants import BULLET_SPEED, PLAYER_WIDTH, BULLET_RAD
 from math import cos, sin, radians, floor, ceil
 
 class Bullet:
@@ -37,8 +34,8 @@ class Bullet:
 
 def collide_walls(x, y, level):
     ''' Checks for collision with nearby walls '''
-    open1 = level[floor(y)][floor(x)]=='0'
-    open2 = level[ceil(y)][floor(x)]=='0'
-    open3 = level[floor(y)][ceil(x)]=='0'
-    open4 = level[ceil(y)][ceil(x)]=='0'
-    return not (open1 and open2 and open3 and open4)
+    open1 = level[round(y + BULLET_RAD/2)][round(x - BULLET_RAD/2)]=='0'
+    open2 = level[round(y + BULLET_RAD/2)][round(x + BULLET_RAD/2)]=='0'
+    open3 = level[round(y - BULLET_RAD/2)][round(x - BULLET_RAD/2)]=='0'
+    open4 = level[round(y - BULLET_RAD/2)][round(x + BULLET_RAD/2)]=='0'
+    return not(open1 and open2 and open3 and open4)

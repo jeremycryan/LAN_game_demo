@@ -1,5 +1,4 @@
-#from constants import SPAWN_RADIUS
-SPAWN_RADIUS = 3
+from constants import SPAWN_RADIUS
 from random import choice
 from player import Player
 from bullet import Bullet
@@ -35,6 +34,7 @@ class Game:
             if player.remove:
                 self.players.remove(player)
             if player.shooting():
+                print('SHOT')
                 self.bullets.append(Bullet(player.color, player.x, player.y, player.direction))
         for bullet in self.bullets:
             bullet.update(self.level, dt)
@@ -49,17 +49,17 @@ class Game:
                 player.input(command)
                 return
 
-    def getState(self):
+    def get_state(self):
         ''' Converts players and bullets to strings '''
         if not len(self.players):
             return ""
-        return ';'.join(str(o) for o in self.players+self.bullets)
+        return ';'.join(str(o) for o in self.players+self.bullets) + ';'
 
-    def getMap(self):
+    def get_map(self):
         ''' Converts map to a string '''
         return ';'.join("".join(l) for l in self.level)
 
-    def getGameOver(self):
+    def get_game_over(self):
         ''' Determines if all players are the same color '''
         if not len(self.players):
             return False

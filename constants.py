@@ -1,17 +1,32 @@
-WINDOW_WIDTH = 640
-WINDOW_HEIGHT = 480
+#------------------DISPLAY CONSTANTS--------------------------------
 
-PIXELS_PER_UNIT = 48
+WINDOW_WIDTH = 950
+WINDOW_HEIGHT = 950
+
+PIXELS_PER_UNIT = 32
 PROP_OFFSET = (1, 1)
 DRAW_OFFSET = (PROP_OFFSET[0]*PIXELS_PER_UNIT,
     PROP_OFFSET[1]*PIXELS_PER_UNIT)
 
-PLAYER_WIDTH = 0.7
 GUN_WIDTH = 0.2
 GUN_LENGTH = 0.8
 TILE_WIDTH = 0.95
-BULLET_RAD = 0.2
 
 NAME_OFFSET = 1.4
 
 SERVER_IP = "192.168.33.160"
+
+COLORS = ['r', 'g', 'b', 'y']*10
+
+#-----------------------PLAYER CONSTANTS------------------------------
+
+SPEED = 3
+COOLDOWN = 0.5
+
+PLAYER_WIDTH = 0.7
+BULLET_RAD = 0.2
+BULLET_SPEED = 12
+
+#--------------------------GAME CONSTANTS----------------------------
+
+SPAWN_RADIUS = 3

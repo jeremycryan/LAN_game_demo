@@ -1,7 +1,5 @@
-#from constants import SPEED, COOLDOWN
-SPEED = 3
-COOLDOWN = 0.5
-from math import sin, cos, radians, floor, ceil
+from constants import SPEED, COOLDOWN, PLAYER_WIDTH
+from math import sin, cos, radians
 
 class Player:
     def __init__(self, name, color, pos, direction = 270):
@@ -31,6 +29,7 @@ class Player:
             self.shoot = False
             self.cooldown = COOLDOWN
             return True
+        self.shoot = False
         return False
 
     def input(self, command):
@@ -66,8 +65,8 @@ class Player:
 
 def collide_walls(x, y, level):
     ''' Checks for collision with nearby walls '''
-    open1 = level[floor(y)][floor(x)]=='0'
-    open2 = level[ceil(y)][floor(x)]=='0'
-    open3 = level[floor(y)][ceil(x)]=='0'
-    open4 = level[ceil(y)][ceil(x)]=='0'
+    open1 = level[round(y + PLAYER_WIDTH/2)][round(x - PLAYER_WIDTH/2)]=='0'
+    open2 = level[round(y + PLAYER_WIDTH/2)][round(x + PLAYER_WIDTH/2)]=='0'
+    open3 = level[round(y - PLAYER_WIDTH/2)][round(x - PLAYER_WIDTH/2)]=='0'
+    open4 = level[round(y - PLAYER_WIDTH/2)][round(x + PLAYER_WIDTH/2)]=='0'
     return not(open1 and open2 and open3 and open4)

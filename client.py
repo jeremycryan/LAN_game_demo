@@ -2,6 +2,7 @@ import pygame
 from constants import *
 import random as rd
 import socket
+import threading
 
 class View():
     def __init__(self):
@@ -9,6 +10,7 @@ class View():
         print("Input player name.")
         self.name = input()
         self.send(self.name)
+        self.do = '0'
 
         pygame.init()
 
@@ -51,19 +53,22 @@ class View():
             raise ConnectionError("Could not connect to server.")
 
     def send(self, string):
-        self.server.send(inputLetters.encode())
+        self.server.send(string.encode())
 
     def main(self):
         a = 0
-        self.receive_map(self)
+        print("Looking for map...")
+        self.receive_map()
         update_thread = threading.Thread(target=self.update)
         update_thread.start()
+        keypress_thread = threading.Thread(target=self.read_keystrokes)
+        keypress_thread.start()
 
-    def read_keystrokes():
+    def read_keystrokes(self):
         while True:
-            pygame.event.pump()
+            #pygame.event.pump()
             events = pygame.event.get()
-            pressed = pygame.get_pressed()
+            pressed = pygame.key.get_pressed()
             for event in events:
                 if event.type == pygame.KEYDOWN:
                     if event.key == self.control_dict['u']:
@@ -74,33 +79,34 @@ class View():
                         self.do = 'l'
                     elif event.key == self.control_dict['r']:
                         self.do = 'r'
-                    elif event.key == self.control_dict['s']:
-                        self.do = 's'
+                    if event.key == self.control_dict['s']:
+                        self.shoot = True
 
             keys = [self.control_dict['u'],
                 self.control_dict['d'],
                 self.control_dict['l'],
-                self.control_dict['r'],
-                self.control_dict['s']]
+                self.control_dict['r']]
             any_presses = 0
+            if not pressed[self.control_dict['s']]:
+                self.shoot = False
             for key in keys:
                 if pressed[key]:
                     any_presses = 1
                     break
             if not any_presses:
                 self.do = '0'
+            if self.shoot:
+                self.send("%s:%s" % (self.name, 's'))
             self.send("%s:%s" % (self.name, self.do))
-            
+
 
     def update(self):
         while True:
-            self.screen.fill((0, 0, 0))
-            self.draw_terrain(self.map)
             self.receive()
             pygame.display.flip()
 
     def receive_map(self):
-        msg = server.recv(2048).decode()
+        msg = self.server.recv(2048).decode()
         msg_split = msg.split(";")
         map_array = []
         for t in msg_split:
@@ -108,20 +114,23 @@ class View():
         self.map = map_array
 
     def receive(self):
-        msg = server.recv(2048).decode()
+        msg = self.server.recv(2048).decode()
+        self.screen.fill((0, 0, 0))
+        self.draw_terrain(self.map)
         msg_split = msg.split(";")
-        for info in msg.split:
+        while '' in msg_split:
+            msg_split.remove('')
+        for info in msg_split:
             key, data = info.split(":")
             data_split = data.split(",")
-            self.draw_terrain(self.map)
-            if key == "player":
+            if key == "Player":
                 name = data_split[0]
                 color = data_split[1]
                 x = float(data_split[2])
                 y = float(data_split[3])
                 d = int(data_split[4])
                 self.draw_player((x, y), d, name, color)
-            elif key == "bullet":
+            elif key == "Bullet":
                 color = data_split[0]
                 x = float(data_split[1])
                 y = float(data_split[2])
@@ -131,6 +140,7 @@ class View():
     def draw_bullet(self, pos, color, direction):
         r = int(BULLET_RAD*PIXELS_PER_UNIT)
         pos = (int(pos[0]*PIXELS_PER_UNIT), int(pos[1]*PIXELS_PER_UNIT))
+        pos = (pos[0] + DRAW_OFFSET[0], pos[1] + DRAW_OFFSET[1])
         pygame.draw.circle(self.screen, self.colors[color], pos, r)
 
     def draw_terrain(self, terrain_list):
