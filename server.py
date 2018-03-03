@@ -38,26 +38,36 @@ def clientThread(conn, addr):
           continue
 
 def updatePlayers():
+    state = None
+    while True:
+        new_state = game.get_state()
+        if new_state != state:
+            state = new_state
+            for client in clients:
+                try:
+                    client.send(new_state.encode())
+                except:
+                    client.close()
+                    if client in clients:
+                        clients.remove(client)
+        time.sleep(0.05)
+
+def gameThread():
     t = time.time()
     while True:
         new_t = time.time()
         dt = new_t - t
         t = new_t
         game.update(dt)
-        for client in clients:
-            try:
-                client.send(game.get_state().encode())
-            except:
-                client.close()
-                if client in clients:
-                    clients.remove(client)
-        time.sleep(0.05)
+        time.sleep(0.01)
 
 threading.Thread(target=updatePlayers).start()
 
+threading.Thread(target=gameThread).start()
 while True:
   conn, addr = server.accept()
   threading.Thread(target=clientThread, args=(conn, addr)).start()
+
 
 conn.close()
 server.close()

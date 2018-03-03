@@ -34,7 +34,6 @@ class Game:
             if player.remove:
                 self.players.remove(player)
             if player.shooting():
-                print('SHOT')
                 self.bullets.append(Bullet(player.color, player.x, player.y, player.direction))
         for bullet in self.bullets:
             bullet.update(self.level, dt)
@@ -47,6 +46,7 @@ class Game:
         for player in self.players:
             if player.name == name:
                 player.input(command)
+                print("%s: %s" % (name, command))
                 return
 
     def get_state(self):

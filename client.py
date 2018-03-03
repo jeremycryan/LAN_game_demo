@@ -10,6 +10,7 @@ class View():
         print("Input player name.")
         self.name = input()
         self.send(self.name)
+        self.sent = '0'
         self.do = '0'
 
         pygame.init()
@@ -97,7 +98,10 @@ class View():
                 self.do = '0'
             if self.shoot:
                 self.send("%s:%s" % (self.name, 's'))
-            self.send("%s:%s" % (self.name, self.do))
+                self.shoot = False
+            if self.do != self.sent:
+                self.send("%s:%s" % (self.name, self.do))
+                self.sent = self.do
 
 
     def update(self):
@@ -194,6 +198,8 @@ class View():
         pygame.draw.rect(self.screen, color, (x, y, w, h))
         pygame.draw.rect(self.screen, color, (gun_x, gun_y, gun_w, gun_h))
 
+    def is_in_sight(self, viewer, object):
+        viewer_pos = (round(viewer_pos[0]), round(viewer_pos[1]))
 
 if __name__ == '__main__':
     a = View()
