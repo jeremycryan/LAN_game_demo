@@ -138,31 +138,34 @@ class View():
         self.shadows = np.zeros(self.map.shape)
 
     def receive(self):
-        msg = self.server.recv(2048).decode()
-        self.screen.fill((0, 0, 0))
-        self.draw_terrain(self.map)
-        msg_split = msg.split(";")
-        while '' in msg_split:
-            msg_split.remove('')
-        for info in msg_split:
-            key, data = info.split(":")
-            data_split = data.split(",")
-            if key == "Player":
-                name = data_split[0]
-                color = data_split[1]
-                x = float(data_split[2])
-                y = float(data_split[3])
-                d = int(data_split[4])
-                self.players[name]=[x, y, d, color]
-                if not self.is_hidden(np.asarray([x, y])):
-                    self.draw_player((x, y), d, name, color)
-            elif key == "Bullet":
-                color = data_split[0]
-                x = float(data_split[1])
-                y = float(data_split[2])
-                d = int(data_split[3])
-                if not self.is_hidden(np.asarray([x, y])):
-                    self.draw_bullet((x, y), color, d)
+        try:
+            msg = self.server.recv(2048).decode()
+            self.screen.fill((0, 0, 0))
+            self.draw_terrain(self.map)
+            msg_split = msg.split(";")
+            while '' in msg_split:
+                msg_split.remove('')
+            for info in msg_split:
+                key, data = info.split(":")
+                data_split = data.split(",")
+                if key == "Player":
+                    name = data_split[0]
+                    color = data_split[1]
+                    x = float(data_split[2])
+                    y = float(data_split[3])
+                    d = int(data_split[4])
+                    self.players[name]=[x, y, d, color]
+                    if not self.is_hidden(np.asarray([x, y])):
+                        self.draw_player((x, y), d, name, color)
+                elif key == "Bullet":
+                    color = data_split[0]
+                    x = float(data_split[1])
+                    y = float(data_split[2])
+                    d = int(data_split[3])
+                    if not self.is_hidden(np.asarray([x, y])):
+                        self.draw_bullet((x, y), color, d)
+        except:
+            print("Lost packet!")
 
     def draw_bullet(self, pos, color, direction):
         r = int(BULLET_RAD*PIXELS_PER_UNIT)
