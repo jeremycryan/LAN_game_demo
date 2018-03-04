@@ -24,6 +24,7 @@ class View():
 
         self.att = {}
         self.players = {}
+        self.players[self.name]=[0, 0, 'd', 'y']
         self.screen = pygame.display.set_mode([WINDOW_WIDTH, WINDOW_HEIGHT])
 
         self.colors = {'r': (255, 0, 0),
@@ -60,17 +61,16 @@ class View():
     def cur_player(self):
         return self.players[self.name]
 
+    def cur_pos(self):
+        cur_pos = np.asarray(self.cur_player()[:2])
+        return cur_pos
+
     def render_shadows(self):
         #   TODO implement this, and add it to rendering loop
-        cur_pos = np.asarray(self.cur_player()[:2])
         for row, row_list in enumerate(self.map):
             for col, cell in enumerate(row_list):
                 cell_pos = np.asarray([col, row])
-                diff_vec = cur_pos - cell_pos
-                shadowy = (np.linalg.norm(diff_vec) > 5)
-                self.map[row, col] = shadowy
-                pass
-
+                self.shadows[row, col] = self.is_hidden(cell_pos)
 
     def send(self, string):
         self.server.send(string.encode())
@@ -122,11 +122,10 @@ class View():
                 self.send("%s:%s" % (self.name, self.do))
                 self.sent = self.do
 
-
     def update(self):
         while True:
             self.receive()
-            #self.render_shadows()
+            self.render_shadows()
             pygame.display.flip()
 
     def receive_map(self):
@@ -154,14 +153,16 @@ class View():
                 x = float(data_split[2])
                 y = float(data_split[3])
                 d = int(data_split[4])
-                self.draw_player((x, y), d, name, color)
                 self.players[name]=[x, y, d, color]
+                if not self.is_hidden(np.asarray([x, y])):
+                    self.draw_player((x, y), d, name, color)
             elif key == "Bullet":
                 color = data_split[0]
                 x = float(data_split[1])
                 y = float(data_split[2])
                 d = int(data_split[3])
-                self.draw_bullet((x, y), color, d)
+                if not self.is_hidden(np.asarray([x, y])):
+                    self.draw_bullet((x, y), color, d)
 
     def draw_bullet(self, pos, color, direction):
         r = int(BULLET_RAD*PIXELS_PER_UNIT)
@@ -180,6 +181,11 @@ class View():
                     tile_x += DRAW_OFFSET[0]
                     tile_y += DRAW_OFFSET[1]
                     pygame.draw.rect(self.screen, color, (tile_x, tile_y, w, h))
+
+    def is_hidden(self, obj_pos):
+        diff_vec = self.cur_pos() - np.asarray(obj_pos)
+        shadowy = (np.linalg.norm(diff_vec) > 7)
+        return shadowy
 
     def draw_player(self, pos, ori, name, color):
         pix_pos = (pos[0] * PIXELS_PER_UNIT, pos[1] * PIXELS_PER_UNIT)
