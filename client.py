@@ -3,6 +3,7 @@ from constants import *
 import random as rd
 import socket
 import threading
+import numpy as np
 
 class View():
     def __init__(self):
@@ -22,12 +23,15 @@ class View():
                             's': pygame.K_RETURN}
 
         self.att = {}
+        self.players = {}
         self.screen = pygame.display.set_mode([WINDOW_WIDTH, WINDOW_HEIGHT])
 
         self.colors = {'r': (255, 0, 0),
             'g': (0, 255, 0),
             'b': (0, 0, 255),
-            'y': (255, 255, 0)}
+            'y': (255, 255, 0),
+            'c': (0, 255, 255),
+            'm': (255, 0, 255)}
         self.terrain_colors = {0: (55, 55, 55),
             1: (100, 100, 100)}
 
@@ -48,10 +52,25 @@ class View():
     def establish_socket(self):
         try:
             self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.port = 52801
+            self.port = PORT
             self.server.connect((SERVER_IP,self.port))
         except:
             raise ConnectionError("Could not connect to server.")
+
+    def cur_player(self):
+        return self.players[self.name]
+
+    def render_shadows(self):
+        #   TODO implement this, and add it to rendering loop
+        cur_pos = np.asarray(self.cur_player()[:2])
+        for row, row_list in enumerate(self.map):
+            for col, cell in enumerate(row_list):
+                cell_pos = np.asarray([col, row])
+                diff_vec = cur_pos - cell_pos
+                shadowy = (np.linalg.norm(diff_vec) > 5)
+                self.map[row, col] = shadowy
+                pass
+
 
     def send(self, string):
         self.server.send(string.encode())
@@ -107,6 +126,7 @@ class View():
     def update(self):
         while True:
             self.receive()
+            #self.render_shadows()
             pygame.display.flip()
 
     def receive_map(self):
@@ -115,7 +135,8 @@ class View():
         map_array = []
         for t in msg_split:
             map_array.append([int(a) for a in t])
-        self.map = map_array
+        self.map = np.asarray(map_array)
+        self.shadows = np.zeros(self.map.shape)
 
     def receive(self):
         msg = self.server.recv(2048).decode()
@@ -134,6 +155,7 @@ class View():
                 y = float(data_split[3])
                 d = int(data_split[4])
                 self.draw_player((x, y), d, name, color)
+                self.players[name]=[x, y, d, color]
             elif key == "Bullet":
                 color = data_split[0]
                 x = float(data_split[1])
@@ -150,13 +172,14 @@ class View():
     def draw_terrain(self, terrain_list):
         for y, row in enumerate(terrain_list):
             for x, terr in enumerate(row):
-                X, Y = x*PIXELS_PER_UNIT, y*PIXELS_PER_UNIT
-                tile_x, tile_y = X - 0.5*TILE_WIDTH*PIXELS_PER_UNIT, Y - 0.5*TILE_WIDTH*PIXELS_PER_UNIT
-                color = self.terrain_colors[terr]
-                w, h = TILE_WIDTH * PIXELS_PER_UNIT, TILE_WIDTH * PIXELS_PER_UNIT
-                tile_x += DRAW_OFFSET[0]
-                tile_y += DRAW_OFFSET[1]
-                pygame.draw.rect(self.screen, color, (tile_x, tile_y, w, h))
+                if not self.shadows[y, x]:
+                    X, Y = x*PIXELS_PER_UNIT, y*PIXELS_PER_UNIT
+                    tile_x, tile_y = X - 0.5*TILE_WIDTH*PIXELS_PER_UNIT, Y - 0.5*TILE_WIDTH*PIXELS_PER_UNIT
+                    color = self.terrain_colors[terr]
+                    w, h = TILE_WIDTH * PIXELS_PER_UNIT, TILE_WIDTH * PIXELS_PER_UNIT
+                    tile_x += DRAW_OFFSET[0]
+                    tile_y += DRAW_OFFSET[1]
+                    pygame.draw.rect(self.screen, color, (tile_x, tile_y, w, h))
 
     def draw_player(self, pos, ori, name, color):
         pix_pos = (pos[0] * PIXELS_PER_UNIT, pos[1] * PIXELS_PER_UNIT)

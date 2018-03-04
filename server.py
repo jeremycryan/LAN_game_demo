@@ -8,8 +8,8 @@ from constants import *
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-IP_address = '192.168.33.160'
-PORT = 52801
+IP_address = SERVER_IP
+#PORT = 52801
 
 server.bind((IP_address,PORT))
 
@@ -22,9 +22,9 @@ clients = []
 def clientThread(conn, addr):
     print("Connection started")
     print(addr)
-
     message = conn.recv(2048)
-    game.add_player(message.decode(), COLORS.pop())
+    print(message.decode())
+    game.add_player(strip_special(message.decode()), COLORS.pop())
     conn.send(game.get_map().encode())
     time.sleep(2)
     clients.append(conn)
@@ -37,6 +37,8 @@ def clientThread(conn, addr):
         except:
           continue
 
+def strip_special(string):
+    return string.replace(":", "").replace(";", "").replace(",", "")
 def updatePlayers():
     state = None
     while True:

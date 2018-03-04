@@ -14,9 +14,10 @@ TILE_WIDTH = 0.95
 
 NAME_OFFSET = 1.4
 
-SERVER_IP = "192.168.33.160"
+SERVER_IP = "10.26.67.130"
+PORT = 52801
 
-COLORS = ['r', 'g', 'b', 'y']*10
+COLORS = ['c', 'm', 'r', 'g', 'b', 'y']*10
 
 #-----------------------PLAYER CONSTANTS------------------------------
 
