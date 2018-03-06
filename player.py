@@ -60,8 +60,8 @@ class Player:
 
     def __repr__(self):
         ''' Prints a more useful description of the object '''
-        return "Player:"+self.name+","+self.color+","+str(self.x)+","+ \
-               str(self.y)+","+str(self.direction)
+        return "Player:"+self.name+","+self.color+","+str(round(self.x, 2))+","+ \
+               str(round(self.y, 2))+","+str(self.direction)
 
 def collide_walls(x, y, level):
     ''' Checks for collision with nearby walls '''

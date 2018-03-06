@@ -39,7 +39,7 @@ class View():
 
         self.max_name = 12
 
-        self.name_font = pygame.font.SysFont("monospace", 20)
+        self.name_font = pygame.font.SysFont("monospace", int(20*PIXELS_PER_UNIT/32))
         self.example_map_1 = [[1, 1, 1, 1, 1, 1, 1],
                             [1, 0, 0, 0, 0, 0, 1],
                             [1, 0, 0, 1, 0, 0, 1],
@@ -141,44 +141,51 @@ class View():
 
     def receive(self):
         try:
-            msg = self.server.recv(2048).decode()
-            msg_split = msg.split(";")
-            while '' in msg_split:
-                msg_split.remove('')
-            drawn = False
-            players_drawn = []
-            bullets_drawn = []
-            for info in msg_split:
-                key, data = info.split(":")
-                data_split = data.split(",")
-                if not drawn:
-                    self.screen.fill((15, 15, 15))
-                    self.draw_terrain(self.map)
-                    drawn = True
-                if key == "Player":
-                    name = data_split[0]
-                    color = data_split[1]
-                    x = float(data_split[2])
-                    y = float(data_split[3])
-                    d = int(data_split[4])
-                    if [name, x, y, d] in players_drawn:
+            msg = self.server.recv(4096).decode()
+            print(msg)
+            if msg:
+                msg_split = msg.split(";")
+                while '' in msg_split:
+                    msg_split.remove('')
+                drawn = False
+                players_drawn = []
+                bullets_drawn = []
+                for info in msg_split:
+                    if len(info.split(":")) == 2:
+                        key, data = info.split(":")
+                        data_split = data.split(",")
+                    else:
                         continue
-                    players_drawn.append([name, x, y, d])
-                    self.players[name]=[x, y, d, color]
-                    if not self.is_hidden(np.asarray([x, y])):
-                        self.draw_player((x, y), d, name, color)
-                elif key == "Bullet":
-                    color = data_split[0]
-                    x = float(data_split[1])
-                    y = float(data_split[2])
-                    d = int(data_split[3])
-                    if [x, y, d] in bullets_drawn:
-                        continue
-                    bullets_drawn.append([x, y, d])
-                    if not self.is_hidden(np.asarray([x, y])):
-                        self.draw_bullet((x, y), color, d)
+                    if not drawn:
+                        self.screen.fill((15, 15, 15))
+                        self.draw_terrain(self.map)
+                        drawn = True
+
+                    if key == "Player":
+                        name = data_split[0]
+                        if name in players_drawn:
+                            continue
+                        color = data_split[1]
+                        x = float(data_split[2])
+                        y = float(data_split[3])
+                        d = int(data_split[4])
+                        players_drawn.append(name)
+                        self.players[name]=[x, y, d, color]
+                        if not self.is_hidden(np.asarray([x, y])):
+                            self.draw_player((x, y), d, name, color)
+
+                    elif key == "Bullet":
+                        color = data_split[0]
+                        x = float(data_split[1])
+                        y = float(data_split[2])
+                        d = int(data_split[3])
+                        if [x, y, d] in bullets_drawn:
+                            continue
+                        bullets_drawn.append([x, y, d])
+                        if not self.is_hidden(np.asarray([x, y])):
+                            self.draw_bullet((x, y), color, d)
         except:
-            print("Lost packet!")
+            print("Lost packet.")
 
     def draw_bullet(self, pos, color, direction):
         r = int(BULLET_RAD*PIXELS_PER_UNIT)

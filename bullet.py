@@ -29,8 +29,8 @@ class Bullet:
 
     def __repr__(self):
         ''' Prints a more useful description of the object '''
-        return "Bullet:"+self.color+","+str(self.x)+","+ \
-               str(self.y)+","+str(self.direction)
+        return "Bullet:"+self.color+","+str(round(self.x, 2))+","+ \
+               str(round(self.y, 2))+","+str(self.direction)
 
 def collide_walls(x, y, level):
     ''' Checks for collision with nearby walls '''

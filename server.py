@@ -13,7 +13,7 @@ IP_address = SERVER_IP
 
 server.bind((IP_address,PORT))
 
-server.listen(20000)
+server.listen(2000)
 
 game = Game()
 
@@ -52,7 +52,7 @@ def updatePlayers():
                     client.close()
                     if client in clients:
                         clients.remove(client)
-        time.sleep(0.01)
+        time.sleep(0.05)
 
 def gameThread():
     t = time.time()
