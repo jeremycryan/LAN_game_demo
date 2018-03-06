@@ -13,6 +13,7 @@ class View():
         self.send(self.name)
         self.sent = '0'
         self.do = '0'
+        self.shoot = False
 
         pygame.init()
 
@@ -27,12 +28,12 @@ class View():
         self.players[self.name]=[0, 0, 'd', 'y']
         self.screen = pygame.display.set_mode([WINDOW_WIDTH, WINDOW_HEIGHT])
 
-        self.colors = {'r': (255, 0, 0),
-            'g': (0, 255, 0),
-            'b': (0, 0, 255),
-            'y': (255, 255, 0),
-            'c': (0, 255, 255),
-            'm': (255, 0, 255)}
+        self.colors = {'r': (200, 50, 20),
+            'g': (0, 140, 40),
+            'b': (90, 60, 210),
+            'y': (220, 200, 0),
+            'c': (0, 180, 220),
+            'm': (220, 0, 200)}
         self.terrain_colors = {0: (55, 55, 55),
             1: (100, 100, 100)}
 
@@ -62,7 +63,8 @@ class View():
         return self.players[self.name]
 
     def cur_pos(self):
-        cur_pos = np.asarray(self.cur_player()[:2])
+        player = self.cur_player()
+        cur_pos = np.asarray([float(player[0]), float(player[1])])
         return cur_pos
 
     def render_shadows(self):
@@ -124,8 +126,8 @@ class View():
 
     def update(self):
         while True:
-            self.receive()
             self.render_shadows()
+            self.receive()
             pygame.display.flip()
 
     def receive_map(self):
@@ -140,20 +142,28 @@ class View():
     def receive(self):
         try:
             msg = self.server.recv(2048).decode()
-            self.screen.fill((0, 0, 0))
-            self.draw_terrain(self.map)
             msg_split = msg.split(";")
             while '' in msg_split:
                 msg_split.remove('')
+            drawn = False
+            players_drawn = []
+            bullets_drawn = []
             for info in msg_split:
                 key, data = info.split(":")
                 data_split = data.split(",")
+                if not drawn:
+                    self.screen.fill((15, 15, 15))
+                    self.draw_terrain(self.map)
+                    drawn = True
                 if key == "Player":
                     name = data_split[0]
                     color = data_split[1]
                     x = float(data_split[2])
                     y = float(data_split[3])
                     d = int(data_split[4])
+                    if [name, x, y, d] in players_drawn:
+                        continue
+                    players_drawn.append([name, x, y, d])
                     self.players[name]=[x, y, d, color]
                     if not self.is_hidden(np.asarray([x, y])):
                         self.draw_player((x, y), d, name, color)
@@ -162,6 +172,9 @@ class View():
                     x = float(data_split[1])
                     y = float(data_split[2])
                     d = int(data_split[3])
+                    if [x, y, d] in bullets_drawn:
+                        continue
+                    bullets_drawn.append([x, y, d])
                     if not self.is_hidden(np.asarray([x, y])):
                         self.draw_bullet((x, y), color, d)
         except:
@@ -185,10 +198,31 @@ class View():
                     tile_y += DRAW_OFFSET[1]
                     pygame.draw.rect(self.screen, color, (tile_x, tile_y, w, h))
 
+
+
     def is_hidden(self, obj_pos):
-        diff_vec = self.cur_pos() - np.asarray(obj_pos)
-        shadowy = (np.linalg.norm(diff_vec) > 7)
-        return shadowy
+        if int(obj_pos[0])==obj_pos[0]:
+            if self.map[int(obj_pos[1])][int(obj_pos[0])] == 1:
+                return False
+        start = self.cur_pos()
+        diff_vec = np.asarray(obj_pos) - start
+        dist = np.linalg.norm(diff_vec)
+        if dist <= 1:
+            return False
+        if dist > 8:
+            return True
+        inc = diff_vec/dist/1.0
+        inc_dist = 0
+        while inc_dist + 1 < dist:
+            start += inc
+            inc_dist += np.linalg.norm(inc)
+            x = int(round(start[0]))
+            y = int(round(start[1]))
+            if x == obj_pos[0] and y == obj_pos[1]:
+                return False
+            if self.map[y][x] == 1:
+                return True
+        return False
 
     def draw_player(self, pos, ori, name, color):
         pix_pos = (pos[0] * PIXELS_PER_UNIT, pos[1] * PIXELS_PER_UNIT)

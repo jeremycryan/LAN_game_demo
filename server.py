@@ -52,7 +52,7 @@ def updatePlayers():
                     client.close()
                     if client in clients:
                         clients.remove(client)
-        time.sleep(0.05)
+        time.sleep(0.01)
 
 def gameThread():
     t = time.time()
