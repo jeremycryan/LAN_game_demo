@@ -1,4 +1,4 @@
-from constants import BULLET_SPEED, PLAYER_WIDTH, BULLET_RAD
+from constants import BULLET_SPEED, PLAYER_WIDTH, BULLET_RAD, PLAYER_CODE, BULLET_CODE
 from math import cos, sin, radians, floor, ceil
 
 class Bullet:
@@ -29,7 +29,7 @@ class Bullet:
 
     def __repr__(self):
         ''' Prints a more useful description of the object '''
-        return "Bullet:"+self.color+","+str(round(self.x, 2))+","+ \
+        return BULLET_CODE+":"+self.color+","+str(round(self.x, 2))+","+ \
                str(round(self.y, 2))+","+str(self.direction)
 
 def collide_walls(x, y, level):

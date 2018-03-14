@@ -70,7 +70,7 @@ class Game:
         return True
 
 if __name__== "__main__":
-    game = Game()
+    game = Game(level='Small')
     game.add_player("Bob", "red")
     game.add_player("Joe", "green")
     game.update(1)

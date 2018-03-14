@@ -1,9 +1,9 @@
-#------------------DISPLAY CONSTANTS--------------------------------
+#------------------DISPLAY CONSTANTS----------------------------------
 
-WINDOW_WIDTH = 450
-WINDOW_HEIGHT = 450
+WINDOW_WIDTH = 950
+WINDOW_HEIGHT = 950
 
-PIXELS_PER_UNIT = 16
+PIXELS_PER_UNIT = 32
 PROP_OFFSET = (1, 1)
 DRAW_OFFSET = (PROP_OFFSET[0]*PIXELS_PER_UNIT,
     PROP_OFFSET[1]*PIXELS_PER_UNIT)
@@ -14,10 +14,12 @@ TILE_WIDTH = 0.95
 
 NAME_OFFSET = 1.4
 
-SERVER_IP = "192.168.33.160"
-PORT = 52801
-
 COLORS = ['c', 'm', 'r', 'g', 'b', 'y']*10
+
+#------------------------NETWORK CONSTANTS----------------------------
+
+SERVER_IP = "192.168.35.179"
+PORT = 52801
 
 #-----------------------PLAYER CONSTANTS------------------------------
 
@@ -31,3 +33,8 @@ BULLET_SPEED = 12
 #--------------------------GAME CONSTANTS----------------------------
 
 SPAWN_RADIUS = 3
+
+#--------------------------PARSING-----------------------------------
+
+PLAYER_CODE = 'P'
+BULLET_CODE = 'B'

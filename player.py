@@ -1,4 +1,4 @@
-from constants import SPEED, COOLDOWN, PLAYER_WIDTH
+from constants import SPEED, COOLDOWN, PLAYER_WIDTH, PLAYER_CODE, BULLET_CODE
 from math import sin, cos, radians
 
 class Player:
@@ -60,7 +60,7 @@ class Player:
 
     def __repr__(self):
         ''' Prints a more useful description of the object '''
-        return "Player:"+self.name+","+self.color+","+str(round(self.x, 2))+","+ \
+        return PLAYER_CODE+":"+self.name+","+self.color+","+str(round(self.x, 2))+","+ \
                str(round(self.y, 2))+","+str(self.direction)
 
 def collide_walls(x, y, level):
